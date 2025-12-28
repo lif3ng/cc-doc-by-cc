@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { claudeFilesPlugin } from '../plugins/claudeFiles'
 
 export default defineConfig({
   css: {
@@ -8,5 +9,8 @@ export default defineConfig({
         (await import('autoprefixer')).default
       ]
     }
-  }
+  },
+  plugins: [
+    claudeFilesPlugin()
+  ]
 })

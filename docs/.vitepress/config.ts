@@ -45,6 +45,14 @@ export default defineConfig({
           { text: '使用示例', link: '/guide/examples' },
           { text: '高级技巧', link: '/guide/advanced' }
         ]
+      },
+      {
+        text: '项目规范',
+        items: [
+          { text: 'commit-conventions.md (提交规范)', link: '/claude/commit-conventions.md' },
+          { text: 'session-changes.md (变更记录)', link: '/claude/session-changes.md' },
+          { text: 'CHANGELOG.md (项目历史)', link: 'https://github.com/lif3ng/cc-doc-by-cc/blob/main/CHANGELOG.md' }
+        ]
       }
     ],
 
