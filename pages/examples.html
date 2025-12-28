@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="winter">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实战示例 - Claude Code 完全指南</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 代码块样式 */
+        .code-block {
+            position: relative;
+            background: #1e293b;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .code-block pre {
+            padding: 1.5rem;
+            padding-top: 2.5rem;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0;
+            background: transparent !important;
+        }
+        .code-block code {
+            font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+        .code-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-language {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 对话气泡样式 */
+        .chat-bubble {
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .chat-bubble.user {
+            background: linear-gradient(135deg, hsl(var(--p)) 0%, hsl(var(--pf)) 100%);
+            color: white;
+            margin-left: 2rem;
+        }
+        .chat-bubble.assistant {
+            background: hsl(var(--b2));
+            border: 1px solid hsl(var(--bc) / 0.2);
+            margin-right: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a href="../index.html">首页</a></li>
+                    <li><a href="../index.html#features">核心功能</a></li>
+                    <li><a href="../index.html#install">安装</a></li>
+                    <li><a href="../index.html#commands">命令</a></li>
+                    <li><a href="../index.html#examples">示例</a></li>
+                </ul>
+            </div>
+            <a href="../index.html" class="btn btn-ghost text-xl font-bold">Claude Code 指南</a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1 gap-2">
+                <li><a href="../index.html" class="btn btn-ghost">首页</a></li>
+                <li><a href="../index.html#features" class="btn btn-ghost">核心功能</a></li>
+                <li><a href="../index.html#install" class="btn btn-ghost">安装</a></li>
+                <li><a href="../index.html#commands" class="btn btn-ghost">命令</a></li>
+                <li><a href="../index.html#examples" class="btn btn-ghost">示例</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end">
+            <a href="../index.html#install" class="btn btn-primary btn-outline">立即开始</a>
+        </div>
+    </div>
+
+    <!-- 页面头部 -->
+    <div class="bg-base-200 py-16">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="breadcrumbs text-sm mb-4">
+                <ul>
+                    <li><a href="../index.html">首页</a></li>
+                    <li>实战示例</li>
+                </ul>
+            </div>
+            <h1 class="text-5xl font-bold text-center mb-4">实战示例</h1>
+            <p class="text-center text-lg text-base-content/70 mb-8">
+                通过真实场景学习如何使用 Claude Code 提升开发效率
+            </p>
+
+            <div class="flex flex-wrap gap-2 justify-center">
+                <a href="#add-feature" class="btn btn-outline btn-sm rounded-full">🚀 添加功能</a>
+                <a href="#fix-bug" class="btn btn-outline btn-sm rounded-full">🐛 修复 Bug</a>
+                <a href="#refactor" class="btn btn-outline btn-sm rounded-full">🔧 代码重构</a>
+                <a href="#git-workflow" class="btn btn-outline btn-sm rounded-full">📝 Git 工作流</a>
+                <a href="#testing" class="btn btn-outline btn-sm rounded-full">✅ 编写测试</a>
+                <a href="#documentation" class="btn btn-outline btn-sm rounded-full">📚 文档编写</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="py-20 bg-base-100">
+        <div class="container mx-auto px-4 max-w-4xl">
+
+            <div id="add-feature" class="mb-16 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">🚀</span>
+                    <div>
+                        <h2 class="text-3xl font-bold">添加新功能：用户认证系统</h2>
+                        <p class="text-base-content/70">学习如何通过自然语言描述让 Claude Code 实现完整的用户认证功能</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>添加用户登录功能，使用 JWT 进行身份验证，包含注册、登录、登出三个端点</p>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <div class="whitespace-pre-wrap">我来帮你添加用户认证功能。让我先了解一下项目结构...
+
+我发现了以下内容：
+- 使用 Express.js 框架
+- 已有用户模型 (models/User.js)
+- 使用 MongoDB 数据库
+
+我将创建以下文件：
+1. middleware/auth.js - JWT 验证中间件
+2. routes/auth.js - 认证路由
+3. controllers/authController.js - 认证控制器
+
+是否继续？</div>
+                    </div>
+
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>继续</p>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <div class="whitespace-pre-wrap">正在创建文件...
+
+✓ 创建 middleware/auth.js
+✓ 创建 routes/auth.js
+✓ 创建 controllers/authController.js
+✓ 更新 app.js 添加认证路由
+
+需要安装依赖：
+- jsonwebtoken
+- bcryptjs
+
+是否现在安装？</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="fix-bug" class="mb-16 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">🐛</span>
+                    <div>
+                        <h2 class="text-3xl font-bold">修复 Bug：API 返回错误</h2>
+                        <p class="text-base-content/70">当出现错误时，如何让 Claude Code 快速定位并修复问题</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>API 返回 500 错误，这是错误日志：</p>
+                        <div class="alert alert-error mt-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span><code>TypeError: Cannot read properties of undefined (reading 'map')</code></span>
+                        </div>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <p class="mb-3">问题定位：<code class="badge badge-sm">postController.js:25:18</code></p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">javascript</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><code class="language-javascript">async function getUserPosts(req, res) {
+  try {
+    const posts = await Post.find({ userId: req.params.userId });
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="refactor" class="mb-16 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">🔧</span>
+                    <div>
+                        <h2 class="text-3xl font-bold">代码重构：优化组件结构</h2>
+                        <p class="text-base-content/70">使用 Claude Code 重构和优化现有代码</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>UserProfile 组件太大了，有 500+ 行代码。帮我将它拆分成更小的组件</p>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <div class="whitespace-pre-wrap">正在分析 UserProfile 组件...
+
+我发现这个组件包含以下功能：
+1. 用户基本信息展示
+2. 头像上传
+3. 密码修改
+4. 邮箱验证
+5. 账户删除
+
+建议拆分为以下组件：
+- UserProfileHeader - 用户信息展示
+- AvatarUpload - 头像上传
+- PasswordChange - 密码修改
+- EmailVerification - 邮箱验证
+- AccountDelete - 账户删除
+
+重构完成！新结构：
+- UserProfile.js: 120 行 (从 500+ 行减少)
+- 各个子组件: 50-80 行</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="git-workflow" class="mb-16 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">📝</span>
+                    <div>
+                        <h2 class="text-3xl font-bold">Git 工作流：创建 Commit 和 PR</h2>
+                        <p class="text-base-content/70">展示 Claude Code 如何简化 Git 操作</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>创建一个 commit</p>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <div class="whitespace-pre-wrap">正在检查 Git 状态...
+
+发现以下变更：
+修改的文件：
+- src/auth.js: 添加 JWT 验证
+- src/routes/userRoutes.js: 更新用户路由
+- package.json: 新增依赖
+
+建议的 commit 信息：
+feat: add JWT authentication system
+
+- Implement JWT token generation and validation
+- Add user registration, login, and logout endpoints
+
+是否使用此 commit 信息？</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="testing" class="mb-16 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">✅</span>
+                    <div>
+                        <h2 class="text-3xl font-bold">编写测试：覆盖业务逻辑</h2>
+                        <p class="text-base-content/70">让 Claude Code 为你的代码生成全面的测试</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>为 authController.js 编写完整的单元测试</p>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <div class="whitespace-pre-wrap">正在分析 authController.js...
+
+发现以下需要测试的函数：
+1. register - 用户注册
+2. login - 用户登录
+3. logout - 用户登出
+4. refreshToken - 刷新令牌
+
+运行结果：
+
+PASS  tests/authController.test.js
+  Auth Controller
+    register
+      ✓ 应该成功注册新用户
+      ✓ 应该拒绝重复邮箱
+    login
+      ✓ 应该使用正确凭据登录
+      ✓ 应该返回 JWT token
+
+Tests: 8 passed, 8 total
+Coverage: 95%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="documentation" class="mb-16 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">📚</span>
+                    <div>
+                        <h2 class="text-3xl font-bold">文档编写：API 文档</h2>
+                        <p class="text-base-content/70">自动生成清晰、完整的 API 文档</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="chat-bubble user">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold">👤 你</span>
+                        </div>
+                        <p>为所有 API 端点生成 OpenAPI/Swagger 文档</p>
+                    </div>
+
+                    <div class="chat-bubble assistant">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-primary">🤖 Claude Code</span>
+                        </div>
+                        <div class="whitespace-pre-wrap">正在扫描 API 路由...
+
+发现的端点：
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/users/:id
+... 共 25 个端点
+
+正在生成文档...
+
+✓ 创建 swagger.json
+✓ 创建 docs/api.md
+✓ 添加 JSDoc 注释
+✓ 配置 Swagger UI
+
+访问文档：http://localhost:3000/api-docs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 高级技巧 -->
+    <div class="py-20 bg-base-200">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">🎯 高级使用技巧</h2>
+                <div class="w-20 h-1 bg-primary mx-auto rounded"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <div class="text-4xl mb-4">📝</div>
+                        <h3 class="card-title">使用项目记忆</h3>
+                        <p class="text-base-content/70 mb-4">在 CLAUDE.md 中记录项目约定</p>
+                        <div class="code-block text-sm">
+                            <div class="code-header">
+                                <span class="code-language">markdown</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><code class="language-markdown"># 项目约定
+- 使用 TypeScript 严格模式
+- 组件放在 src/components
+- 测试文件放在 __tests__</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h3 class="card-title">批量处理任务</h3>
+                        <p class="text-base-content/70 mb-4">一次提出多个相关任务</p>
+                        <div class="code-block text-sm">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><code class="language-bash">> claude
+1. 添加错误处理
+2. 编写测试
+3. 更新文档
+4. 创建 PR</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <div class="text-4xl mb-4">🔌</div>
+                        <h3 class="card-title">管道组合</h3>
+                        <p class="text-base-content/70 mb-4">与其他工具组合使用</p>
+                        <div class="code-block text-sm">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><code class="language-bash"># 查找 TODO 并生成 issues
+grep -r "TODO" src/ | \
+  claude -p "生成 GitHub issues"</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer p-10 bg-base-300 text-base-content">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="footer-title">Claude Code 指南</h3>
+                    <p>基于 Anthropic 官方文档编写<br/>2025 最新版本</p>
+                </div>
+                <div>
+                    <h3 class="footer-title">相关链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank" class="link link-hover">官方文档</a></li>
+                        <li><a href="https://github.com/anthropics/claude-code" target="_blank" class="link link-hover">GitHub 仓库</a></li>
+                        <li><a href="../index.html" class="link link-hover">返回首页</a></li>
+                        <li><a href="../pages/features.html" class="link link-hover">核心功能详解</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">快速开始</h3>
+                    <div class="code-block">
+                        <pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="text-center text-base-content/70">
+                <p>© 2025 Claude Code 完全指南. Powered by DaisyUI + Tailwind CSS</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

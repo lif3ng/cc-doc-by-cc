@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="winter">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code 完全指南 - AI 编程助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Highlight.js 代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.10.0/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.10.0/highlight.min.js"></script>
+    <style>
+        /* 代码块样式 */
+        .code-block {
+            position: relative;
+            background: #0d1117;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .code-block pre {
+            padding: 1.5rem;
+            padding-top: 2.5rem;
+            overflow-x: auto;
+            margin: 0;
+            background: transparent !important;
+        }
+        .code-block code {
+            font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+        .code-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-language {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 隐藏 tab 内容 */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn.active {
+            background-color: hsl(var(--b2));
+            border-color: hsl(var(--p));
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a href="#home">首页</a></li>
+                    <li><a href="#features">核心功能</a></li>
+                    <li><a href="#install">安装</a></li>
+                    <li><a href="#commands">命令</a></li>
+                    <li><a href="#examples">示例</a></li>
+                </ul>
+            </div>
+            <a class="btn btn-ghost text-xl font-bold">Claude Code 指南</a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1 gap-2">
+                <li><a href="#home" class="btn btn-ghost">首页</a></li>
+                <li><a href="#features" class="btn btn-ghost">核心功能</a></li>
+                <li><a href="#install" class="btn btn-ghost">安装</a></li>
+                <li><a href="#commands" class="btn btn-ghost">命令</a></li>
+                <li><a href="#examples" class="btn btn-ghost">示例</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end">
+            <a href="pages/features.html" class="btn btn-primary btn-outline">深入了解</a>
+        </div>
+    </div>
+
+    <div class="hero min-h-screen" style="background: linear-gradient(135deg, hsl(var(--b1)) 0%, hsl(var(--b3)) 100%);">
+        <div class="hero-content text-center">
+            <div class="max-w-3xl">
+                <h1 class="text-6xl font-extrabold mb-6">Claude Code</h1>
+                <p class="text-3xl font-bold text-primary mb-4">Anthropic 官方 AI 编程助手</p>
+                <p class="py-6 text-lg text-base-content/70">
+                    直接在你的终端中使用自然语言编写代码、调试程序、理解代码库。<br/>
+                    <span class="text-primary font-bold">10 倍提升开发效率！</span>
+                </p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <a href="#install" class="btn btn-primary btn-lg">快速开始</a>
+                    <a href="pages/features.html" class="btn btn-outline btn-lg">了解更多</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="features" class="py-20 bg-base-200">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">核心功能</h2>
+                <div class="w-20 h-1 bg-primary mx-auto rounded"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="card-body">
+                        <div class="text-5xl mb-4">🚀</div>
+                        <h3 class="card-title">从描述构建功能</h3>
+                        <p class="text-base-content/70">用自然语言描述你想要的功能，Claude Code 会制定计划、编写代码并确保它正常工作。</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="card-body">
+                        <div class="text-5xl mb-4">🐛</div>
+                        <h3 class="card-title">智能调试修复</h3>
+                        <p class="text-base-content/70">描述 Bug 或粘贴错误信息，Claude Code 会分析代码库、定位问题并实施修复。</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="card-body">
+                        <div class="text-5xl mb-4">🗺️</div>
+                        <h3 class="card-title">导航任何代码库</h3>
+                        <p class="text-base-content/70">询问关于团队代码库的任何问题，获得深思熟虑的答案。保持对整个项目结构的感知。</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="card-body">
+                        <div class="text-5xl mb-4">⚡</div>
+                        <h3 class="card-title">自动化繁琐任务</h3>
+                        <p class="text-base-content/70">修复 lint 问题、解决 merge conflicts、编写发布说明。一条命令完成所有操作。</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="card-body">
+                        <div class="text-5xl mb-4">🔌</div>
+                        <h3 class="card-title">MCP 集成</h3>
+                        <p class="text-base-content/70">通过模型上下文协议连接外部数据源，如 Google Drive、Figma、Slack 等。</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div class="card-body">
+                        <div class="text-5xl mb-4">🎯</div>
+                        <h3 class="card-title">Unix 哲学</h3>
+                        <p class="text-base-content/70">可组合和脚本化。通过管道处理内容，在 CI 中自动化执行任务。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="install" class="py-20">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">快速安装</h2>
+                <div class="w-20 h-1 bg-primary mx-auto rounded"></div>
+            </div>
+
+            <ul class="steps w-full mb-16">
+                <li class="step step-primary">运行安装命令</li>
+                <li class="step step-primary">首次启动</li>
+                <li class="step step-primary">开始使用</li>
+            </ul>
+
+            <div class="space-y-6 mb-16">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">1. 运行安装命令</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><code class="language-bash">curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">2. 首次启动</h3>
+                        <div class="code-block">
+                            <pre><code>claude</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                        <p class="text-base-content/70 mt-2">首次使用时会提示登录 Claude.ai 账户</p>
+                    </div>
+                </div>
+
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">3. 开始使用</h3>
+                        <div class="code-block">
+                            <pre><code>claude "解释这个项目"</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h3 class="card-title mb-6">其他安装方式</h3>
+                    <div role="tablist" class="tabs tabs-lifted mb-6">
+                        <input type="radio" name="install_tabs" role="tab" class="tab" aria-label="Homebrew" checked />
+                        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                            <div class="code-block">
+                                <pre><code>brew install claude-ai</code></pre>
+                                <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                            </div>
+                        </div>
+
+                        <input type="radio" name="install_tabs" role="tab" class="tab" aria-label="NPM" />
+                        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                            <div class="code-block">
+                                <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+                                <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                            </div>
+                        </div>
+
+                        <input type="radio" name="install_tabs" role="tab" class="tab" aria-label="Windows" />
+                        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                            <div class="code-block">
+                                <pre><code># 使用 Scoop
+scoop bucket add claude-ai
+scoop install claude-code
+
+# 或下载 Windows 安装程序
+# https://claude.ai/download</code></pre>
+                                <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="commands" class="py-20 bg-base-200">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">常用命令</h2>
+                <div class="w-20 h-1 bg-primary mx-auto rounded"></div>
+            </div>
+
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6">CLI 命令</h3>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead class="bg-primary text-primary-content">
+                            <tr>
+                                <th>命令</th>
+                                <th>说明</th>
+                                <th>示例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code class="badge badge-primary">claude</code></td>
+                                <td>启动交互式会话</td>
+                                <td>claude</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-primary">claude "任务"</code></td>
+                                <td>执行一次性任务</td>
+                                <td>claude "解释这个项目"</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-primary">claude -p "查询"</code></td>
+                                <td>查询后退出</td>
+                                <td>claude -p "解释这个函数"</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-primary">cat file | claude -p</code></td>
+                                <td>处理管道内容</td>
+                                <td>cat logs.txt | claude -p "分析"</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-primary">claude -c</code></td>
+                                <td>继续最近的对话</td>
+                                <td>claude -c</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-primary">claude commit</code></td>
+                                <td>创建 Git 提交</td>
+                                <td>claude commit</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold mb-6">斜杠命令</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/help</code>
+                        <span class="text-base">显示帮助信息</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/clear</code>
+                        <span class="text-base">清除对话历史</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/config</code>
+                        <span class="text-base">查看或修改配置</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/cost</code>
+                        <span class="text-base">显示 Token 使用统计</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/init</code>
+                        <span class="text-base">初始化项目指南</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/memory</code>
+                        <span class="text-base">编辑记忆文件</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/review</code>
+                        <span class="text-base">请求代码审查</span>
+                    </div>
+                    <div class="badge badge-lg badge-outline h-auto py-4 px-6 flex items-center gap-2">
+                        <code class="text-primary font-bold">/vim</code>
+                        <span class="text-base">进入/退出 Vim 模式</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples" class="py-20">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">使用示例</h2>
+                <div class="w-20 h-1 bg-primary mx-auto rounded"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <span class="text-2xl mr-2">🔍</span>
+                            理解代码库
+                        </h3>
+                        <div class="code-block">
+                            <pre><code>> claude
+这个项目是做什么的？
+
+主要模块有哪些？
+
+解释一下 auth.js 的工作原理</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <span class="text-2xl mr-2">🐛</span>
+                            修复 Bug
+                        </h3>
+                        <div class="code-block">
+                            <pre><code>> claude
+修复登录页面的验证错误
+
+这个测试失败了，帮我看看
+
+解决这个 TypeScript 错误</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <span class="text-2xl mr-2">✨</span>
+                            添加功能
+                        </h3>
+                        <div class="code-block">
+                            <pre><code>> claude
+添加用户认证功能
+
+实现一个购物车组件
+
+添加暗黑模式支持</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <span class="text-2xl mr-2">📝</span>
+                            Git 操作
+                        </h3>
+                        <div class="code-block">
+                            <pre><code>> claude commit
+
+创建一个 PR
+
+解决 merge conflict</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <span class="text-2xl mr-2">🔧</span>
+                            代码重构
+                        </h3>
+                        <div class="code-block">
+                            <pre><code>> claude
+重构这个函数，使其更清晰
+
+将这个组件拆分成更小的部分
+
+优化这个查询的性能</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">
+                            <span class="text-2xl mr-2">✅</span>
+                            编写测试
+                        </h3>
+                        <div class="code-block">
+                            <pre><code>> claude
+为这个函数写单元测试
+
+生成集成测试
+
+添加端到端测试</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-base-200">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">高级技巧</h2>
+                <div class="w-20 h-1 bg-primary mx-auto rounded"></div>
+            </div>
+            <div class="space-y-6">
+                <div class="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div>
+                        <h3 class="font-bold">换行输入</h3>
+                        <div class="text-sm">快速转义：<kbd class="kbd kbd-sm">\</kbd> 后按 Enter | 键盘快捷键：<kbd class="kbd kbd-sm">Option</kbd>+<kbd class="kbd kbd-sm">Enter</kbd> (macOS)</div>
+                    </div>
+                </div>
+                <div class="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div>
+                        <h3 class="font-bold">快速添加记忆</h3>
+                        <div class="text-sm">用 <kbd class="kbd kbd-sm">#</kbd> 开头输入，会提示选择记忆文件存储位置</div>
+                    </div>
+                </div>
+                <div class="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div>
+                        <h3 class="font-bold">Vim 模式</h3>
+                        <div class="text-sm">输入 <code>/vim</code> 启用 Vim 键位，支持 <kbd class="kbd kbd-sm">hjkl</kbd>、<kbd class="kbd kbd-sm">w/e/b</kbd>、<kbd class="kbd kbd-sm">dd</kbd>、<kbd class="kbd kbd-sm">cc</kbd> 等</div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title">管道处理</h3>
+                        <div class="code-block">
+                            <pre><code># 监控日志并报警
+tail -f app.log | claude -p "发现异常就通知我"
+
+# 批量处理
+cat errors.txt | claude -p "修复所有这些错误"</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer p-10 bg-base-300 text-base-content">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="footer-title">Claude Code 指南</h3>
+                    <p>基于 Anthropic 官方文档编写<br/>2025 最新版本</p>
+                </div>
+                <div>
+                    <h3 class="footer-title">相关链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank" class="link link-hover">官方文档</a></li>
+                        <li><a href="https://github.com/anthropics/claude-code" target="_blank" class="link link-hover">GitHub 仓库</a></li>
+                        <li><a href="pages/features.html" class="link link-hover">核心功能详解</a></li>
+                        <li><a href="pages/examples.html" class="link link-hover">实战示例</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">快速开始</h3>
+                    <div class="code-block">
+                        <pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="text-center text-base-content/70">
+                <p>© 2025 Claude Code 完全指南. Powered by DaisyUI + Tailwind CSS</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

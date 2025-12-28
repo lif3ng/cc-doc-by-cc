@@ -1,0 +1,39 @@
+{
+  "name": "claude-cn-docs",
+  "version": "1.0.0",
+  "description": "Claude Code 完全指南 - 中文文档",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "http-server . -p 8080 -c-1",
+    "start": "npm run dev",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "keywords": [
+    "claude",
+    "ai",
+    "documentation",
+    "chinese"
+  ],
+  "author": "Claude Code Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.3",
+    "autoprefixer": "^10.4.23",
+    "daisyui": "^5.5.14",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.11",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.26"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
